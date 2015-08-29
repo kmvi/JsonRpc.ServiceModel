@@ -17,11 +17,17 @@ namespace JsonRpc.ServiceModel.Dispatcher
 {
     class JsonRpcDispatchFormatter : IDispatchMessageFormatter
     {
-        private readonly OperationDescription _operation;
+        private readonly OperationDescription _operation;        
+        private readonly MessageDescription _requestMessage;
+        private readonly MessageDescription _responseMessage;
+
+        private const string MessageIdKey = "MessageId";
 
         public JsonRpcDispatchFormatter(OperationDescription operation)
         {
             _operation = operation;
+            _requestMessage = _operation.Messages.First(x => x.Direction == MessageDirection.Input);
+            _responseMessage = _operation.Messages.First(x => x.Direction == MessageDirection.Output);
         }
 
         public void DeserializeRequest(Message message, object[] parameters)
@@ -40,11 +46,10 @@ namespace JsonRpc.ServiceModel.Dispatcher
                 body = (JsonRpcRequest)serializer.Deserialize(bodyReader, typeof(JsonRpcRequest));
             }
 
-            var requestMessage = _operation.Messages.First(x => x.Direction == MessageDirection.Input);
             var paramValues = body.Params as JObject;
             if (paramValues != null) {
                 int paramIndex = 0;
-                foreach (var parameter in requestMessage.Body.Parts) {
+                foreach (var parameter in _requestMessage.Body.Parts) {
                     JToken value;
                     if (paramValues.TryGetValue(parameter.Name, out value)) {
                         parameters[paramIndex] = value.ToObject(parameter.Type);
@@ -54,33 +59,69 @@ namespace JsonRpc.ServiceModel.Dispatcher
                 }
             }
 
-            OperationContext.Current.IncomingMessageProperties["MessageId"] = body.Id;
+            message.Properties[MessageIdKey] = body.Id;
+        }
+
+        private JsonRpcResponse CreateResponse(object result)
+        {
+            var jsonResponse = new JsonRpcResponse();
+            jsonResponse.Result = result;
+
+            object messageId;
+            MessageProperties inMsgProperties = OperationContext.Current.IncomingMessageProperties;
+            if (inMsgProperties.TryGetValue(MessageIdKey, out messageId))
+                jsonResponse.Id = messageId;
+
+            return jsonResponse;
+        }
+
+        private Encoding GetResponseMessageEncoding()
+        {
+            HttpRequestMessageProperty httpRequest = null;
+            MessageProperties inMsgProperties = OperationContext.Current.IncomingMessageProperties;
+            if (inMsgProperties.ContainsKey(HttpRequestMessageProperty.Name)) {
+                httpRequest = (HttpRequestMessageProperty)inMsgProperties[HttpRequestMessageProperty.Name];
+            }
+
+            Encoding encoding = Encoding.UTF8;
+            string charset = null;
+            if (httpRequest != null) {
+                charset = httpRequest.Headers[HttpRequestHeader.AcceptCharset];
+            }
+
+            if (charset != null)
+                encoding = Encoding.GetEncoding(charset);
+
+            return encoding;
         }
 
         public Message SerializeReply(MessageVersion messageVersion, object[] parameters, object result)
         {
             byte[] rawBody;
-            
+            var serializer = new JsonSerializer();
+            JsonRpcResponse jsonResponse = CreateResponse(result);
+            Encoding encoding = GetResponseMessageEncoding();
+
             using (var memStream = new MemoryStream()) {
-                using (JsonTextWriter writer = new JsonTextWriter(new StreamWriter(memStream, Encoding.UTF8))) {
+                using (JsonTextWriter writer = new JsonTextWriter(new StreamWriter(memStream, encoding))) {
                     writer.Formatting = Newtonsoft.Json.Formatting.None;
-                    var jsonResponse = new JsonRpcResponse();
-                    jsonResponse.Result = result;
-                    jsonResponse.Id = OperationContext.Current.IncomingMessageProperties["MessageId"];
-                    var serializer = new JsonSerializer();
+
                     serializer.Serialize(writer, jsonResponse);
                     writer.Flush();
+
                     rawBody = memStream.ToArray();
                 }
             }
 
-            var responseMessage = _operation.Messages.First(x => x.Direction == MessageDirection.Output);
-            Message replyMessage = Message.CreateMessage(messageVersion, responseMessage.Action, new RawBodyWriter(rawBody));
+            Message replyMessage = Message.CreateMessage(messageVersion,
+                _responseMessage.Action, new RawBodyWriter(rawBody));
 
-            replyMessage.Properties.Add(WebBodyFormatMessageProperty.Name, new WebBodyFormatMessageProperty(WebContentFormat.Raw));
+            replyMessage.Properties.Add(WebBodyFormatMessageProperty.Name,
+                new WebBodyFormatMessageProperty(WebContentFormat.Raw));
 
-            HttpResponseMessageProperty respProp = new HttpResponseMessageProperty();
-            respProp.Headers[HttpResponseHeader.ContentType] = "application/json";
+            var respProp = new HttpResponseMessageProperty();
+            respProp.Headers[HttpResponseHeader.ContentType] =
+                String.Format("application/json; charset={0}", encoding.WebName);
             replyMessage.Properties.Add(HttpResponseMessageProperty.Name, respProp);
 
             return replyMessage;

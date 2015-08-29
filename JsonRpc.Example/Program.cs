@@ -49,7 +49,7 @@ namespace JsonRpc.Example
             //Thread.Sleep(-1);
             
             var client = new WebClient();
-            client.Headers[HttpRequestHeader.ContentType] = "application/json";
+            client.Headers[HttpRequestHeader.ContentType] = "application/json; charset=utf-8";
 
             // call SimpleMethod
             var simpleMethodCall = @"{""jsonrpc"": ""2.0"", ""method"": ""SimpleMethod"", ""params"": {""str"": ""World""}, ""id"": 1}";
