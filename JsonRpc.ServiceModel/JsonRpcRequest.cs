@@ -7,9 +7,9 @@ using System.Text;
 namespace JsonRpc.ServiceModel
 {
     [JsonObject(MemberSerialization.OptIn)]
-    class JsonRequest
+    class JsonRpcRequest
     {
-        public JsonRequest()
+        public JsonRpcRequest()
         {
         }
 

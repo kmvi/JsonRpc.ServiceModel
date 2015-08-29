@@ -41,6 +41,8 @@ namespace JsonRpc.ServiceModel.Dispatcher
 
         public string SelectOperation(ref Message message)
         {
+            // TODO: check message format (raw)
+
             Message messageCopy;
             using (MessageBuffer buffer = message.CreateBufferedCopy(Int32.MaxValue)) {                
                 message = buffer.CreateMessage();
@@ -50,6 +52,8 @@ namespace JsonRpc.ServiceModel.Dispatcher
             string operation = SelectOperationInternal(messageCopy);
             if (operation == null)
                 throw new InvalidOperationException("Invalid message format.");
+
+            message.Properties["HttpOperationName"] = operation;
 
             return operation;
         }

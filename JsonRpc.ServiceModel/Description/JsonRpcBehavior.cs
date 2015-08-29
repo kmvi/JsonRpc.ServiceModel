@@ -31,6 +31,8 @@ namespace JsonRpc.ServiceModel.Description
 
         public void Validate(ServiceEndpoint endpoint)
         {
+            // TODO: check WebMessageEncodingBindingElement presence
+            // TODO: check http method (POST only)
         }
     }
 }

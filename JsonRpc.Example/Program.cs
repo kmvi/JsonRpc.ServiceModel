@@ -15,13 +15,22 @@ namespace JsonRpc.Example
     {
         [OperationContract]
         string SimpleMethod(string str);
+
+        [OperationContract]
+        int Add(int a, int b);
     }
 
+    [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
     class SimpleService : ISimpleService
     {
         public string SimpleMethod(string str)
         {
             return "Hello " + str;
+        }
+
+        public int Add(int a, int b)
+        {
+            return a + b;
         }
     }
 
@@ -36,13 +45,20 @@ namespace JsonRpc.Example
                 .Behaviors.Add(new JsonRpcBehavior());
 
             host.Open();
+
+            //Thread.Sleep(-1);
             
             var client = new WebClient();
             client.Headers[HttpRequestHeader.ContentType] = "application/json";
 
             // call SimpleMethod
             var simpleMethodCall = @"{""jsonrpc"": ""2.0"", ""method"": ""SimpleMethod"", ""params"": {""str"": ""World""}, ""id"": 1}";
-            var response = client.UploadString(baseUri.ToString() + "/json-rpc", simpleMethodCall);
+            string response = client.UploadString(baseUri.ToString() + "/json-rpc", simpleMethodCall);
+            Console.WriteLine("SimpleMethod(\"World\"): " + response);
+
+            var addCall = @"{""jsonrpc"": ""2.0"", ""method"": ""Add"", ""params"": {""a"": 42, ""b"": 24}, ""id"": 2}";
+            response = client.UploadString(baseUri.ToString() + "/json-rpc", addCall);
+            Console.WriteLine("Add(42, 24): " + response);
         }
     }
 }

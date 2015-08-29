@@ -21,7 +21,7 @@ namespace JsonRpc.ServiceModel.Description
 
         public void ApplyDispatchBehavior(OperationDescription operationDescription, DispatchOperation dispatchOperation)
         {
-            dispatchOperation.Formatter = new JsonRpcDispatchFormatter();
+            dispatchOperation.Formatter = new JsonRpcDispatchFormatter(operationDescription);
         }
 
         public void Validate(OperationDescription operationDescription)

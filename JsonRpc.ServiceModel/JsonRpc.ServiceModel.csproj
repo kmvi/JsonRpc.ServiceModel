@@ -50,12 +50,15 @@
     <Compile Include="Description\JsonRpcBehavior.cs" />
     <Compile Include="Dispatcher\JsonRpcClientFormatter.cs" />
     <Compile Include="Dispatcher\JsonRpcDispatchFormatter.cs" />
+    <Compile Include="JsonRpcException.cs" />
     <Compile Include="JsonRpcHttpBinding.cs" />
     <Compile Include="Configuration\JsonRpcHttpBindingCollectionElement.cs" />
     <Compile Include="Description\JsonRpcOperationBehavior.cs" />
     <Compile Include="Dispatcher\JsonRpcOperationSelector.cs" />
     <Compile Include="JsonRpcRequest.cs" />
+    <Compile Include="JsonRpcResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Channels\RawBodyWriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
