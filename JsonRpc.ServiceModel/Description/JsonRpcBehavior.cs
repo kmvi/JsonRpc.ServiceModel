@@ -19,7 +19,7 @@ namespace JsonRpc.ServiceModel.Description
         {
             foreach (var op in endpoint.Contract.Operations) {
                 if (op.Behaviors.Find<JsonRpcOperationBehavior>() == null)
-                    op.Behaviors.Add(new JsonRpcOperationBehavior());
+                    op.Behaviors.Add(new JsonRpcOperationBehavior(endpoint));
             }
         }
 
@@ -29,7 +29,7 @@ namespace JsonRpc.ServiceModel.Description
             endpointDispatcher.DispatchRuntime.OperationSelector = new JsonRpcOperationSelector();
             foreach (var op in endpoint.Contract.Operations) {
                 if (op.Behaviors.Find<JsonRpcOperationBehavior>() == null)
-                    op.Behaviors.Add(new JsonRpcOperationBehavior());
+                    op.Behaviors.Add(new JsonRpcOperationBehavior(endpoint));
             }
         }
 

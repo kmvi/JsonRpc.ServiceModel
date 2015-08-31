@@ -11,6 +11,13 @@ namespace JsonRpc.ServiceModel.Description
 {
     class JsonRpcOperationBehavior : IOperationBehavior
     {
+        private readonly ServiceEndpoint _endpoint;
+
+        public JsonRpcOperationBehavior(ServiceEndpoint endpoint)
+        {
+            _endpoint = endpoint;
+        }
+
         public void AddBindingParameters(OperationDescription operationDescription, BindingParameterCollection bindingParameters)
         {
         }
@@ -19,7 +26,7 @@ namespace JsonRpc.ServiceModel.Description
         {
             clientOperation.DeserializeReply = true;
             clientOperation.SerializeRequest = true;
-            clientOperation.Formatter = new JsonRpcClientFormatter(operationDescription);
+            clientOperation.Formatter = new JsonRpcClientFormatter(operationDescription, _endpoint);
         }
 
         public void ApplyDispatchBehavior(OperationDescription operationDescription, DispatchOperation dispatchOperation)

@@ -20,12 +20,14 @@ namespace JsonRpc.ServiceModel.Dispatcher
         private readonly OperationDescription _operation;
         private readonly MessageDescription _requestMessage;
         private readonly MessageDescription _responseMessage;
+        private readonly ServiceEndpoint _endpoint;
 
         private const string MessageIdKey = "MessageId";
 
-        public JsonRpcClientFormatter(OperationDescription operation)
+        public JsonRpcClientFormatter(OperationDescription operation, ServiceEndpoint endpoint)
         {
             _operation = operation;
+            _endpoint = endpoint;
             _requestMessage = _operation.Messages.First(x => x.Direction == MessageDirection.Input);
             _responseMessage = _operation.Messages.First(x => x.Direction == MessageDirection.Output);
         }
@@ -86,7 +88,7 @@ namespace JsonRpc.ServiceModel.Dispatcher
             Message requestMessage = Message.CreateMessage(messageVersion,
                 _requestMessage.Action, new RawBodyWriter(rawBody));
 
-            requestMessage.Headers.To = new Uri("http://kuimov:8085/simplesvc/json-rpc");
+            requestMessage.Headers.To = _endpoint.Address.Uri;
 
             requestMessage.Properties.Add(WebBodyFormatMessageProperty.Name,
                 new WebBodyFormatMessageProperty(WebContentFormat.Raw));
