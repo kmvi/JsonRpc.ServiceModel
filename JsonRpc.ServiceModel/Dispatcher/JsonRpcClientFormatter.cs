@@ -27,11 +27,15 @@ namespace JsonRpc.ServiceModel.Dispatcher
 
         public object DeserializeReply(Message message, object[] parameters)
         {
+            byte[] rawBody = DeserializeBody(message);
+
+            var property = (HttpResponseMessageProperty)message.Properties[HttpResponseMessageProperty.Name];
+            if ((int)property.StatusCode < 200 || (int)property.StatusCode > 299)
+                return null; // TODO: wrap error
+
             Type destType = _responseMessage.Body.ReturnValue.Type;
             if (typeof(void) == destType)
                 return null;
-
-            byte[] rawBody = DeserializeBody(message);
 
             IJsonRpcResponseResult body;
             var responseType = typeof(JsonRpcResponse<>).MakeGenericType(destType);            
