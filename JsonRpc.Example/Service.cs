@@ -8,7 +8,7 @@ using System.Text;
 namespace JsonRpc.Example
 {
     [DataContract]
-    class ComplexType
+    struct ComplexType
     {
         [DataMember]
         public string Name { get; set; }
@@ -18,6 +18,12 @@ namespace JsonRpc.Example
 
         [DataMember]
         public double? NullableProperty { get; set; }
+
+        public override string ToString()
+        {
+            return String.Format("Name: {0}, BirthDate: {1}, NullableProperty: {2}",
+                Name, BirthDate, NullableProperty);
+        }
     }
 
     [ServiceContract]

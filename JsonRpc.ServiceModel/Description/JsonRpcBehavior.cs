@@ -17,6 +17,10 @@ namespace JsonRpc.ServiceModel.Description
 
         public void ApplyClientBehavior(ServiceEndpoint endpoint, ClientRuntime clientRuntime)
         {
+            foreach (var op in endpoint.Contract.Operations) {
+                if (op.Behaviors.Find<JsonRpcOperationBehavior>() == null)
+                    op.Behaviors.Add(new JsonRpcOperationBehavior());
+            }
         }
 
         public void ApplyDispatchBehavior(ServiceEndpoint endpoint, EndpointDispatcher endpointDispatcher)

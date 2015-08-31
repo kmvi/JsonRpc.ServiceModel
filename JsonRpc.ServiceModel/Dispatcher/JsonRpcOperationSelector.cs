@@ -43,6 +43,9 @@ namespace JsonRpc.ServiceModel.Dispatcher
         {
             // TODO: check message format (raw)
 
+            if (message.Properties.ContainsKey("HttpOperationName"))
+                return (string)message.Properties["HttpOperationName"];
+
             Message messageCopy;
             using (MessageBuffer buffer = message.CreateBufferedCopy(Int32.MaxValue)) {                
                 message = buffer.CreateMessage();

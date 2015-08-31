@@ -62,9 +62,9 @@ namespace JsonRpc.ServiceModel.Dispatcher
             message.Properties[MessageIdKey] = body.Id;
         }
 
-        private JsonRpcResponse CreateResponse(object result)
+        private JsonRpcResponse<object> CreateResponse(object result)
         {
-            var jsonResponse = new JsonRpcResponse();
+            var jsonResponse = new JsonRpcResponse<object>();
             jsonResponse.Result = result;
 
             object messageId;
@@ -99,7 +99,7 @@ namespace JsonRpc.ServiceModel.Dispatcher
         {
             byte[] rawBody;
             var serializer = new JsonSerializer();
-            JsonRpcResponse jsonResponse = CreateResponse(result);
+            JsonRpcResponse<object> jsonResponse = CreateResponse(result);
             Encoding encoding = GetResponseMessageEncoding();
 
             using (var memStream = new MemoryStream()) {
