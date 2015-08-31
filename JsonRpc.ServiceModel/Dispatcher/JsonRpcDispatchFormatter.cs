@@ -15,30 +15,18 @@ using System.Xml;
 
 namespace JsonRpc.ServiceModel.Dispatcher
 {
-    class JsonRpcDispatchFormatter : IDispatchMessageFormatter
+    class JsonRpcDispatchFormatter : JsonRpcFormatterBase, IDispatchMessageFormatter
     {
-        private readonly OperationDescription _operation;        
-        private readonly MessageDescription _requestMessage;
-        private readonly MessageDescription _responseMessage;
-
-        private const string MessageIdKey = "MessageId";
-
         public JsonRpcDispatchFormatter(OperationDescription operation)
+            : base(operation)
         {
-            _operation = operation;
-            _requestMessage = _operation.Messages.First(x => x.Direction == MessageDirection.Input);
-            _responseMessage = _operation.Messages.First(x => x.Direction == MessageDirection.Output);
         }
 
         public void DeserializeRequest(Message message, object[] parameters)
         {
             // TODO: check message format (raw)
 
-            byte[] rawBody;
-            using (XmlDictionaryReader bodyReader = message.GetReaderAtBodyContents()) {
-                bodyReader.ReadStartElement("Binary");
-                rawBody = bodyReader.ReadContentAsBase64();
-            }
+            byte[] rawBody = DeserializeBody(message);
 
             JsonRpcRequest body;
             using (var bodyReader = new StreamReader(new MemoryStream(rawBody))) {
@@ -60,6 +48,16 @@ namespace JsonRpc.ServiceModel.Dispatcher
             }
 
             message.Properties[MessageIdKey] = body.Id;
+        }
+
+        public Message SerializeReply(MessageVersion messageVersion, object[] parameters, object result)
+        {
+            JsonRpcResponse<object> jsonResponse = CreateResponse(result);
+            Encoding encoding = GetResponseMessageEncoding();
+
+            byte[] rawBody = SerializeBody(jsonResponse, encoding);
+
+            return CreateMessage(messageVersion, _responseMessage.Action, rawBody, encoding);
         }
 
         private JsonRpcResponse<object> CreateResponse(object result)
@@ -93,38 +91,6 @@ namespace JsonRpc.ServiceModel.Dispatcher
                 encoding = Encoding.GetEncoding(charset);
 
             return encoding;
-        }
-
-        public Message SerializeReply(MessageVersion messageVersion, object[] parameters, object result)
-        {
-            byte[] rawBody;
-            var serializer = new JsonSerializer();
-            JsonRpcResponse<object> jsonResponse = CreateResponse(result);
-            Encoding encoding = GetResponseMessageEncoding();
-
-            using (var memStream = new MemoryStream()) {
-                using (JsonTextWriter writer = new JsonTextWriter(new StreamWriter(memStream, encoding))) {
-                    writer.Formatting = Newtonsoft.Json.Formatting.None;
-
-                    serializer.Serialize(writer, jsonResponse);
-                    writer.Flush();
-
-                    rawBody = memStream.ToArray();
-                }
-            }
-
-            Message replyMessage = Message.CreateMessage(messageVersion,
-                _responseMessage.Action, new RawBodyWriter(rawBody));
-
-            replyMessage.Properties.Add(WebBodyFormatMessageProperty.Name,
-                new WebBodyFormatMessageProperty(WebContentFormat.Raw));
-
-            var respProp = new HttpResponseMessageProperty();
-            respProp.Headers[HttpResponseHeader.ContentType] =
-                String.Format("application/json; charset={0}", encoding.WebName);
-            replyMessage.Properties.Add(HttpResponseMessageProperty.Name, respProp);
-
-            return replyMessage;
         }
     }
 }

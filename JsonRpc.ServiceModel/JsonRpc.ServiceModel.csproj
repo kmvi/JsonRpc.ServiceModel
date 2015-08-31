@@ -50,6 +50,7 @@
     <Compile Include="Description\JsonRpcBehavior.cs" />
     <Compile Include="Dispatcher\JsonRpcClientFormatter.cs" />
     <Compile Include="Dispatcher\JsonRpcDispatchFormatter.cs" />
+    <Compile Include="Dispatcher\JsonRpcFormatterBase.cs" />
     <Compile Include="JsonRpcException.cs" />
     <Compile Include="JsonRpcHttpBinding.cs" />
     <Compile Include="Configuration\JsonRpcHttpBindingCollectionElement.cs" />

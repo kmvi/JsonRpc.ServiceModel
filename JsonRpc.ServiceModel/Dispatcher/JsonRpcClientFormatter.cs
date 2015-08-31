@@ -15,21 +15,14 @@ using System.Xml;
 
 namespace JsonRpc.ServiceModel.Dispatcher
 {
-    class JsonRpcClientFormatter : IClientMessageFormatter
+    class JsonRpcClientFormatter : JsonRpcFormatterBase, IClientMessageFormatter
     {
-        private readonly OperationDescription _operation;
-        private readonly MessageDescription _requestMessage;
-        private readonly MessageDescription _responseMessage;
         private readonly ServiceEndpoint _endpoint;
 
-        private const string MessageIdKey = "MessageId";
-
         public JsonRpcClientFormatter(OperationDescription operation, ServiceEndpoint endpoint)
+            : base(operation)
         {
-            _operation = operation;
             _endpoint = endpoint;
-            _requestMessage = _operation.Messages.First(x => x.Direction == MessageDirection.Input);
-            _responseMessage = _operation.Messages.First(x => x.Direction == MessageDirection.Output);
         }
 
         public object DeserializeReply(Message message, object[] parameters)
@@ -38,11 +31,7 @@ namespace JsonRpc.ServiceModel.Dispatcher
             if (typeof(void) == destType)
                 return null;
 
-            byte[] rawBody;
-            using (XmlDictionaryReader bodyReader = message.GetReaderAtBodyContents()) {
-                bodyReader.ReadStartElement("Binary");
-                rawBody = bodyReader.ReadContentAsBase64();
-            }
+            byte[] rawBody = DeserializeBody(message);
 
             IJsonRpcResponseResult body;
             var responseType = typeof(JsonRpcResponse<>).MakeGenericType(destType);            
@@ -56,10 +45,8 @@ namespace JsonRpc.ServiceModel.Dispatcher
             return body.Result;
         }
 
-        public Message SerializeRequest(MessageVersion messageVersion, object[] parameters)
+        private JsonRpcRequest CreateRequest(object[] parameters)
         {
-            byte[] rawBody;
-            var serializer = new JsonSerializer();
             JsonRpcRequest jsonRequest = new JsonRpcRequest();
             jsonRequest.Id = Guid.NewGuid().ToString(); // TODO: mb int?
             jsonRequest.Method = _operation.Name;
@@ -74,27 +61,18 @@ namespace JsonRpc.ServiceModel.Dispatcher
 
             jsonRequest.Params = args;
 
-            using (var memStream = new MemoryStream()) {
-                using (JsonTextWriter writer = new JsonTextWriter(new StreamWriter(memStream, Encoding.UTF8))) {
-                    writer.Formatting = Newtonsoft.Json.Formatting.None;
+            return jsonRequest;
+        }
 
-                    serializer.Serialize(writer, jsonRequest);
-                    writer.Flush();
+        public Message SerializeRequest(MessageVersion messageVersion, object[] parameters)
+        {
+            JsonRpcRequest jsonRequest = CreateRequest(parameters);
+            byte[] rawBody = SerializeBody(jsonRequest, Encoding.UTF8);
 
-                    rawBody = memStream.ToArray();
-                }
-            }
-
-            Message requestMessage = Message.CreateMessage(messageVersion,
-                _requestMessage.Action, new RawBodyWriter(rawBody));
+            Message requestMessage = CreateMessage(
+                messageVersion, _requestMessage.Action, rawBody, Encoding.UTF8);
 
             requestMessage.Headers.To = _endpoint.Address.Uri;
-
-            requestMessage.Properties.Add(WebBodyFormatMessageProperty.Name,
-                new WebBodyFormatMessageProperty(WebContentFormat.Raw));
-            HttpRequestMessageProperty reqProp = new HttpRequestMessageProperty();
-            reqProp.Headers[HttpRequestHeader.ContentType] = String.Format("application/json; charset=utf-8");
-            requestMessage.Properties.Add(HttpRequestMessageProperty.Name, reqProp);
             requestMessage.Properties.Add("HttpOperationName", _operation.Name);
 
             return requestMessage;
