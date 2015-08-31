@@ -65,7 +65,9 @@ namespace JsonRpc.ServiceModel.Dispatcher
 
             int paramIndex = 0;
             foreach (var parameter in _requestMessage.Body.Parts) {
-                args.Add(new JProperty(parameter.Name, parameters[paramIndex++]));
+                var token = JToken.FromObject(parameters[paramIndex]);
+                args.Add(new JProperty(parameter.Name, token));
+                paramIndex++;
             }
 
             jsonRequest.Params = args;

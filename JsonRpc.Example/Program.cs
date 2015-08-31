@@ -54,6 +54,9 @@ namespace JsonRpc.Example
             Console.Write("Call VoidMethod()... ");
             client.VoidMethod();
             Console.WriteLine("success");
+
+            Console.WriteLine("ComplexArg(arg): " +
+                client.ComplexArg(new ComplexType { Name = "1234", BirthDate = DateTime.Now }));
         }
 
         static void Main(string[] args)

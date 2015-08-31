@@ -40,6 +40,9 @@ namespace JsonRpc.Example
 
         [OperationContract]
         void VoidMethod();
+
+        [OperationContract]
+        string ComplexArg(ComplexType arg);
     }
 
     [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
@@ -67,6 +70,11 @@ namespace JsonRpc.Example
         public void VoidMethod()
         {
 
+        }
+
+        public string ComplexArg(ComplexType arg)
+        {
+            return arg.ToString();
         }
     }
 }
