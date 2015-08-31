@@ -43,6 +43,10 @@ namespace JsonRpc.Example
 
         [OperationContract]
         string ComplexArg(ComplexType arg);
+
+        [OperationContract]
+        [FaultContract(typeof(ArgumentException))]
+        string GotException();
     }
 
     [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
@@ -75,6 +79,11 @@ namespace JsonRpc.Example
         public string ComplexArg(ComplexType arg)
         {
             return arg.ToString();
+        }
+
+        public string GotException()
+        {
+            throw new ArgumentException("exception");
         }
     }
 }

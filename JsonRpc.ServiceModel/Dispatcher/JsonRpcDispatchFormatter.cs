@@ -26,7 +26,7 @@ namespace JsonRpc.ServiceModel.Dispatcher
         {
             // TODO: check message format (raw)
 
-            byte[] rawBody = DeserializeBody(message);
+            byte[] rawBody = DispatcherUtils.DeserializeBody(message);
 
             JsonRpcRequest body;
             using (var bodyReader = new StreamReader(new MemoryStream(rawBody))) {
@@ -55,9 +55,9 @@ namespace JsonRpc.ServiceModel.Dispatcher
             JsonRpcResponse<object> jsonResponse = CreateResponse(result);
             Encoding encoding = GetResponseMessageEncoding();
 
-            byte[] rawBody = SerializeBody(jsonResponse, encoding);
+            byte[] rawBody = DispatcherUtils.SerializeBody(jsonResponse, encoding);
 
-            return CreateMessage(messageVersion, _responseMessage.Action, rawBody, encoding);
+            return DispatcherUtils.CreateMessage(messageVersion, _responseMessage.Action, rawBody, encoding);
         }
 
         private JsonRpcResponse<object> CreateResponse(object result)

@@ -27,26 +27,30 @@ namespace JsonRpc.ServiceModel.Dispatcher
 
         public object DeserializeReply(Message message, object[] parameters)
         {
-            byte[] rawBody = DeserializeBody(message);
-
             var property = (HttpResponseMessageProperty)message.Properties[HttpResponseMessageProperty.Name];
-            if ((int)property.StatusCode < 200 || (int)property.StatusCode > 299)
-                return null; // TODO: wrap error
+            bool isError = ((int)property.StatusCode >= 400);
+            byte[] rawBody = DispatcherUtils.DeserializeBody(message);
 
-            Type destType = _responseMessage.Body.ReturnValue.Type;
-            if (typeof(void) == destType)
-                return null;
+            if (isError) {
+                // TODO
+                throw null;
+            } else {
+                
+                IJsonRpcResponseResult body;
+                Type destType = _responseMessage.Body.ReturnValue.Type;
+                if (typeof(void) == destType)
+                    return null;
 
-            IJsonRpcResponseResult body;
-            var responseType = typeof(JsonRpcResponse<>).MakeGenericType(destType);            
-            using (var bodyReader = new StreamReader(new MemoryStream(rawBody))) {
-                var serializer = new JsonSerializer();
-                body = (IJsonRpcResponseResult)serializer.Deserialize(bodyReader, responseType);
+                var responseType = typeof(JsonRpcResponse<>).MakeGenericType(destType);
+                using (var bodyReader = new StreamReader(new MemoryStream(rawBody))) {
+                    var serializer = new JsonSerializer();
+                    body = (IJsonRpcResponseResult)serializer.Deserialize(bodyReader, responseType);
+                }
+
+                // TODO: check id
+
+                return body.Result;
             }
-
-            // TODO: check id
-
-            return body.Result;
         }
 
         private JsonRpcRequest CreateRequest(object[] parameters)
@@ -71,9 +75,9 @@ namespace JsonRpc.ServiceModel.Dispatcher
         public Message SerializeRequest(MessageVersion messageVersion, object[] parameters)
         {
             JsonRpcRequest jsonRequest = CreateRequest(parameters);
-            byte[] rawBody = SerializeBody(jsonRequest, Encoding.UTF8);
+            byte[] rawBody = DispatcherUtils.SerializeBody(jsonRequest, Encoding.UTF8);
 
-            Message requestMessage = CreateMessage(
+            Message requestMessage = DispatcherUtils.CreateMessage(
                 messageVersion, _requestMessage.Action, rawBody, Encoding.UTF8);
 
             requestMessage.Headers.To = _endpoint.Address.Uri;
