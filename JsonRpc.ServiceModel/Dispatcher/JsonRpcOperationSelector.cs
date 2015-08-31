@@ -43,6 +43,10 @@ namespace JsonRpc.ServiceModel.Dispatcher
         {
             // TODO: check message format (raw)
 
+            // Ignore non-POST requests
+            if (!EnsurePostRequest(message))
+                return null;
+
             if (message.Properties.ContainsKey("HttpOperationName"))
                 return (string)message.Properties["HttpOperationName"];
 
@@ -59,6 +63,17 @@ namespace JsonRpc.ServiceModel.Dispatcher
             message.Properties["HttpOperationName"] = operation;
 
             return operation;
+        }
+
+        private bool EnsurePostRequest(Message message)
+        {
+            if (message.Properties.ContainsKey(HttpRequestMessageProperty.Name)) {
+                var property = (HttpRequestMessageProperty)message.Properties[HttpRequestMessageProperty.Name];
+                if (property.Method.Equals("POST", StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
         }
     }
 }
