@@ -35,6 +35,10 @@ namespace JsonRpc.Example
             string voidMethodCall = @"{""jsonrpc"": ""2.0"", ""method"": ""VoidMethod"", ""params"": null, ""id"": 3}";
             response = client.UploadString(uri, voidMethodCall);
             Console.WriteLine("VoidMethod(): " + response);
+
+            string complexArgCall = @"{""jsonrpc"": ""2.0"", ""method"": ""ComplexArg"", ""params"": {""arg"": {""Name"": ""1234"", ""BirthDate"": ""1980-01-01""}}, ""id"": 4}";
+            response = client.UploadString(uri, complexArgCall);
+            Console.WriteLine("ComplexArg(arg): " + response);
         }
 
         static void ChannelFactoryExample(string baseUri)
