@@ -14,15 +14,15 @@ namespace JsonRpc.ServiceModel
         public int Code { get; set; }
 
         [JsonProperty(PropertyName = "message", Required = Required.Always)]
-        public string ErrorMessage { get; set; }
+        public override string Message { get { return base.Message; } }
 
         [JsonProperty(PropertyName = "data", NullValueHandling = NullValueHandling.Ignore)]
         public object AdditionalData { get; set; }
 
         public JsonRpcException(int code, string message, object data)
+            : base(message)
         {
             Code = code;
-            ErrorMessage = message;
             AdditionalData = data;
         }
     }

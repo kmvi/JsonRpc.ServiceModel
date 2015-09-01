@@ -22,19 +22,24 @@ namespace JsonRpc.ServiceModel.Dispatcher
 
         public void ProvideFault(Exception error, MessageVersion version, ref Message fault)
         {
-            var debugBehavior = OperationContext.Current.Host.Description.Behaviors.Find<ServiceDebugBehavior>();
-            bool includeDetails = (debugBehavior != null && debugBehavior.IncludeExceptionDetailInFaults);
+            bool includeDetails = IncludeExceptionDetails();
 
             // TODO: check error type and set appropriate error code
-            // FIXME: includeDetails always false
 
             object msgId = null;
             if (OperationContext.Current.IncomingMessageProperties.ContainsKey(DispatcherUtils.MessageIdKey))
                 msgId = OperationContext.Current.IncomingMessageProperties[DispatcherUtils.MessageIdKey];
 
             // TODO: extract exception details from FaultException
+            object additionalData;
+            var faultException = error as FaultException;
+            if (faultException != null && faultException.GetType().IsGenericType) {
+                additionalData = faultException.GetType().GetProperty("Detail").GetValue(faultException, null);
+            } else {
+                additionalData = error;
+            }
 
-            var exception = new JsonRpcException(123, error.Message, error);
+            var exception = new JsonRpcException(123, error.Message, additionalData);
             var errMessage = new JsonRpcResponse<object>()
             {
                 Error = exception,
@@ -50,6 +55,16 @@ namespace JsonRpc.ServiceModel.Dispatcher
             property.StatusDescription = "Internal Server Error";
 
             fault = msg;
+        }
+
+        private bool IncludeExceptionDetails()
+        {
+            var behaviors = OperationContext.Current.Host.Description.Behaviors;
+            var debugBehavior = behaviors.Find<ServiceDebugBehavior>();
+            var serviceBehavior = behaviors.Find<ServiceBehaviorAttribute>();
+
+            return (debugBehavior != null && debugBehavior.IncludeExceptionDetailInFaults) ||
+                (serviceBehavior != null && serviceBehavior.IncludeExceptionDetailInFaults);
         }
     }
 }

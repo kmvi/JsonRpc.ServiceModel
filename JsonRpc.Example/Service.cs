@@ -49,7 +49,7 @@ namespace JsonRpc.Example
         string GotException();
     }
 
-    [ServiceBehavior(IncludeExceptionDetailInFaults = true)]
+    [ServiceBehavior(IncludeExceptionDetailInFaults = false)]
     class SimpleService : ISimpleService
     {
         public string SimpleMethod(string str)

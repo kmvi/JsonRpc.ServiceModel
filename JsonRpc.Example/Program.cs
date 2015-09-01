@@ -76,7 +76,7 @@ namespace JsonRpc.Example
             try {
                 var result = client.GotException();
             } catch (JsonRpcException e) {
-                Console.WriteLine("GotException(): " + e.Message);
+                Console.WriteLine("GotException(): " + e.ToString());
             }
         }
 

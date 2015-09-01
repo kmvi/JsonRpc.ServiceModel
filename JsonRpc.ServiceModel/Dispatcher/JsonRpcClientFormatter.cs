@@ -44,8 +44,13 @@ namespace JsonRpc.ServiceModel.Dispatcher
 
             // TODO: check id
 
-            if (isError)
-                throw body.Error;
+            if (isError) {
+                if (body.Error != null) {
+                    throw body.Error;
+                }
+                // TODO
+                throw new Exception();
+            }
 
             return body.Result;
         }
