@@ -43,7 +43,7 @@ namespace JsonRpc.Example
 
             string gotExceptionCall = @"{""jsonrpc"": ""2.0"", ""method"": ""GotException"", ""id"": 5}";
             try {
-                client.UploadString(uri, gotExceptionCall);
+                response = client.UploadString(uri, gotExceptionCall);
             } catch (WebException e) {
                 Console.WriteLine("GotException(): " + e.Message);
                 using (var reader = new StreamReader(e.Response.GetResponseStream())) {
@@ -62,7 +62,7 @@ namespace JsonRpc.Example
 
             var client = factory.CreateChannel();
 
-            /*Console.WriteLine("SimpleMethod(\"World\"): " + client.SimpleMethod("World"));
+            Console.WriteLine("SimpleMethod(\"World\"): " + client.SimpleMethod("World"));
             Console.WriteLine("Add(42, 24): " + client.Add(42, 24).ToString());
             Console.WriteLine("GetComplexType(3.14): " + client.GetComplexType(3.14).ToString());
 
@@ -71,11 +71,11 @@ namespace JsonRpc.Example
             Console.WriteLine("success");
 
             Console.WriteLine("ComplexArg(arg): " +
-                client.ComplexArg(new ComplexType { Name = "1234", BirthDate = DateTime.Now }));*/
+                client.ComplexArg(new ComplexType { Name = "1234", BirthDate = DateTime.Now }));
 
             try {
                 var result = client.GotException();
-            } catch (WebException e) {
+            } catch (JsonRpcException e) {
                 Console.WriteLine("GotException(): " + e.Message);
             }
         }
@@ -93,7 +93,7 @@ namespace JsonRpc.Example
             //Thread.Sleep(-1);
 
             Console.WriteLine("Using WebClient to make requests...");
-            //WebClientExample(baseUri.ToString());
+            WebClientExample(baseUri.ToString());
 
             Console.WriteLine();
             Console.WriteLine("Using ChannelFactory to make requests...");
