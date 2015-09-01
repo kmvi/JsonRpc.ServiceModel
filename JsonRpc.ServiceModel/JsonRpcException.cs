@@ -8,22 +8,22 @@ namespace JsonRpc.ServiceModel
 {
     [Serializable]
     [JsonObject(MemberSerialization.OptIn)]
-    public class JsonRpcException : ApplicationException
+    public class JsonRpcException : Exception
     {
-        [JsonProperty]
-        public int code { get; set; }
+        [JsonProperty(PropertyName = "code", Required = Required.Always)]
+        public int Code { get; set; }
 
-        [JsonProperty]
-        public string message { get; set; }
+        [JsonProperty(PropertyName = "message", Required = Required.Always)]
+        public string ErrorMessage { get; set; }
 
-        [JsonProperty]
-        public object data { get; set; }
+        [JsonProperty(PropertyName = "data", NullValueHandling = NullValueHandling.Ignore)]
+        public object AdditionalData { get; set; }
 
         public JsonRpcException(int code, string message, object data)
         {
-            this.code = code;
-            this.message = message;
-            this.data = data;
+            Code = code;
+            ErrorMessage = message;
+            AdditionalData = data;
         }
     }
 }

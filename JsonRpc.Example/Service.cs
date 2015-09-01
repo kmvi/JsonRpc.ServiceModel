@@ -83,7 +83,9 @@ namespace JsonRpc.Example
 
         public string GotException()
         {
-            throw new FaultException<ArgumentException>(new ArgumentException("exception"));
+            throw new FaultException<ArgumentException>(
+                new ArgumentException("exception"),
+                new FaultReason("reason"));
             //throw new ArgumentException("exception");
         }
     }

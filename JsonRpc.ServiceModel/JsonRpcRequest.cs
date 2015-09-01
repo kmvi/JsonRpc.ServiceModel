@@ -9,17 +9,16 @@ namespace JsonRpc.ServiceModel
     [JsonObject(MemberSerialization.OptIn)]
     class JsonRpcRequest
     {
-        public JsonRpcRequest()
-        {
-        }
+        [JsonProperty("jsonrpc", Required = Required.Always)]
+        public string JsonRpcVersion { get { return "2.0"; } }
 
-        [JsonProperty("method")]
+        [JsonProperty("method", Required = Required.Always)]
         public string Method { get; set; }
 
-        [JsonProperty("params")]
+        [JsonProperty("params", NullValueHandling = NullValueHandling.Ignore)]
         public object Params { get; set; }
 
-        [JsonProperty("id")]
+        [JsonProperty("id", Required = Required.AllowNull)]
         public object Id { get; set; }
     }
 }

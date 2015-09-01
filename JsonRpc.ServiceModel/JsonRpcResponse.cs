@@ -8,7 +8,7 @@ namespace JsonRpc.ServiceModel
 {
     public interface IJsonRpcResponseResult
     {
-        string JsonRpc { get; }
+        string JsonRpcVersion { get; }
         object Result { get; }
         object Id { get; set; }
         JsonRpcException Error { get; set; }
@@ -18,7 +18,7 @@ namespace JsonRpc.ServiceModel
     public class JsonRpcResponse<T> : IJsonRpcResponseResult
     {
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "jsonrpc")]
-        public string JsonRpc { get { return "2.0"; } }
+        public string JsonRpcVersion { get { return "2.0"; } }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore, PropertyName = "result")]
         public T Result { get; set; }
