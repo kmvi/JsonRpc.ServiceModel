@@ -24,8 +24,6 @@ namespace JsonRpc.ServiceModel.Description
 
         public void ApplyClientBehavior(OperationDescription operationDescription, ClientOperation clientOperation)
         {
-            clientOperation.DeserializeReply = true;
-            clientOperation.SerializeRequest = true;
             clientOperation.Formatter = new JsonRpcClientFormatter(operationDescription, _endpoint);
         }
 
