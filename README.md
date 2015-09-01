@@ -38,3 +38,4 @@ host.Open();
 - Set correct error codes
 - Unwrap `FaultException<T>`
 - Tests
+- Batches (???)
