@@ -39,3 +39,4 @@ host.Open();
 - Unwrap `FaultException<T>`
 - Tests
 - Batches (???)
+- Configuration elements
