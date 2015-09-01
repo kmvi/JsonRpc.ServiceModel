@@ -13,6 +13,8 @@ namespace JsonRpc.ServiceModel.Dispatcher
 {
     class DispatcherUtils
     {
+        public const string MessageIdKey = "MessageId";
+
         public static byte[] SerializeBody(object content, Encoding encoding)
         {
             var serializer = new JsonSerializer();

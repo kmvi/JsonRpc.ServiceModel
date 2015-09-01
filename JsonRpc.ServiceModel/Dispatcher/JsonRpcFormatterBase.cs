@@ -18,8 +18,6 @@ namespace JsonRpc.ServiceModel.Dispatcher
         protected readonly MessageDescription _requestMessage;
         protected readonly MessageDescription _responseMessage;
 
-        protected const string MessageIdKey = "MessageId";
-
         protected JsonRpcFormatterBase(OperationDescription operation)
         {
             _operation = operation;

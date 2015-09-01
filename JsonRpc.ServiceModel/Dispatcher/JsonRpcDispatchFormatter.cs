@@ -47,7 +47,7 @@ namespace JsonRpc.ServiceModel.Dispatcher
                 }
             }
 
-            message.Properties[MessageIdKey] = body.Id;
+            message.Properties[DispatcherUtils.MessageIdKey] = body.Id;
         }
 
         public Message SerializeReply(MessageVersion messageVersion, object[] parameters, object result)
@@ -67,7 +67,7 @@ namespace JsonRpc.ServiceModel.Dispatcher
 
             object messageId;
             MessageProperties inMsgProperties = OperationContext.Current.IncomingMessageProperties;
-            if (inMsgProperties.TryGetValue(MessageIdKey, out messageId))
+            if (inMsgProperties.TryGetValue(DispatcherUtils.MessageIdKey, out messageId))
                 jsonResponse.Id = messageId;
 
             return jsonResponse;

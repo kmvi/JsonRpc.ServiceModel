@@ -8,7 +8,10 @@ namespace JsonRpc.ServiceModel
 {
     public interface IJsonRpcResponseResult
     {
+        string JsonRpc { get; }
         object Result { get; }
+        object Id { get; set; }
+        JsonRpcException Error { get; set; }
     }
 
     [JsonObject(MemberSerialization.OptIn)]

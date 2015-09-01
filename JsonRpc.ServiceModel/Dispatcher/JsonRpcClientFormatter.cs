@@ -29,28 +29,25 @@ namespace JsonRpc.ServiceModel.Dispatcher
         {
             var property = (HttpResponseMessageProperty)message.Properties[HttpResponseMessageProperty.Name];
             bool isError = ((int)property.StatusCode >= 400);
+
+            IJsonRpcResponseResult body;
+            Type destType = _responseMessage.Body.ReturnValue.Type;
+            if (typeof(void) == destType && !isError)
+                return null;
+
             byte[] rawBody = DispatcherUtils.DeserializeBody(message);
-
-            if (isError) {
-                // TODO
-                throw null;
-            } else {
-                
-                IJsonRpcResponseResult body;
-                Type destType = _responseMessage.Body.ReturnValue.Type;
-                if (typeof(void) == destType)
-                    return null;
-
-                var responseType = typeof(JsonRpcResponse<>).MakeGenericType(destType);
-                using (var bodyReader = new StreamReader(new MemoryStream(rawBody))) {
-                    var serializer = new JsonSerializer();
-                    body = (IJsonRpcResponseResult)serializer.Deserialize(bodyReader, responseType);
-                }
-
-                // TODO: check id
-
-                return body.Result;
+            var responseType = typeof(JsonRpcResponse<>).MakeGenericType(destType);
+            using (var bodyReader = new StreamReader(new MemoryStream(rawBody))) {
+                var serializer = new JsonSerializer();
+                body = (IJsonRpcResponseResult)serializer.Deserialize(bodyReader, responseType);
             }
+
+            // TODO: check id
+
+            if (isError)
+                throw body.Error;
+
+            return body.Result;
         }
 
         private JsonRpcRequest CreateRequest(object[] parameters)
