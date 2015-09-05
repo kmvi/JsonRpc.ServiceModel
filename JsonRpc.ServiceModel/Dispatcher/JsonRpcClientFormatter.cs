@@ -83,7 +83,7 @@ namespace JsonRpc.ServiceModel.Dispatcher
                 messageVersion, _requestMessage.Action, rawBody, Encoding.UTF8);
 
             requestMessage.Headers.To = _endpoint.Address.Uri;
-            requestMessage.Properties.Add("HttpOperationName", _operation.Name);
+            requestMessage.Properties.Add(DispatcherUtils.OperationNameKey, _operation.Name);
 
             return requestMessage;
         }

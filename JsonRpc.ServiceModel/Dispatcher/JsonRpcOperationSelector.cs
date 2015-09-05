@@ -47,8 +47,8 @@ namespace JsonRpc.ServiceModel.Dispatcher
             if (!EnsurePostRequest(message))
                 return null;
 
-            if (message.Properties.ContainsKey("HttpOperationName"))
-                return (string)message.Properties["HttpOperationName"];
+            if (message.Properties.ContainsKey(DispatcherUtils.OperationNameKey))
+                return (string)message.Properties[DispatcherUtils.OperationNameKey];
 
             Message messageCopy;
             using (MessageBuffer buffer = message.CreateBufferedCopy(Int32.MaxValue)) {                
@@ -60,7 +60,7 @@ namespace JsonRpc.ServiceModel.Dispatcher
             if (operation == null)
                 throw new InvalidOperationException("Invalid message format.");
 
-            message.Properties["HttpOperationName"] = operation;
+            message.Properties[DispatcherUtils.OperationNameKey] = operation;
 
             return operation;
         }

@@ -14,6 +14,7 @@ namespace JsonRpc.ServiceModel.Dispatcher
     class DispatcherUtils
     {
         public const string MessageIdKey = "MessageId";
+        public const string OperationNameKey = "JsonRpcOperationName";
 
         public static byte[] SerializeBody(object content, Encoding encoding)
         {
