@@ -24,8 +24,6 @@ namespace JsonRpc.ServiceModel.Dispatcher
         {
             bool includeDetails = IncludeExceptionDetails();
 
-            // TODO: check error type and set appropriate error code
-
             object msgId = null;
             if (OperationContext.Current.IncomingMessageProperties.ContainsKey(DispatcherUtils.MessageIdKey))
                 msgId = OperationContext.Current.IncomingMessageProperties[DispatcherUtils.MessageIdKey];
@@ -39,22 +37,8 @@ namespace JsonRpc.ServiceModel.Dispatcher
                 additionalData = error;
             }
 
-            var exception = new JsonRpcException(123, error.Message, additionalData);
-            var errMessage = new JsonRpcResponse<object>()
-            {
-                Error = exception,
-                Result = null,
-                Id = msgId
-            };
-
-            byte[] rawBody = DispatcherUtils.SerializeBody(errMessage, Encoding.UTF8);
-            Message msg = DispatcherUtils.CreateMessage(version, "", rawBody, Encoding.UTF8);
-
-            var property = (HttpResponseMessageProperty)msg.Properties[HttpResponseMessageProperty.Name];
-            property.StatusCode = HttpStatusCode.InternalServerError;
-            property.StatusDescription = "Internal Server Error";
-
-            fault = msg;
+            // TODO: check error type and set appropriate error code
+            fault = DispatcherUtils.CreateErrorMessage(version, msgId, 123, error.Message, additionalData);
         }
 
         private bool IncludeExceptionDetails()

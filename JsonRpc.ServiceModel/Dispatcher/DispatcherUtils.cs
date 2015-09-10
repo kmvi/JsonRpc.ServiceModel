@@ -47,6 +47,53 @@ namespace JsonRpc.ServiceModel.Dispatcher
             return message;
         }
 
+        public static Message CreateErrorMessage(MessageVersion messageVersion, object messageId,
+            int errorCode, string errorMessage, object details)
+        {
+            var exception = new JsonRpcException(errorCode, errorMessage, details);
+            var errMessage = new JsonRpcResponse<object>()
+            {
+                Error = exception,
+                Result = null,
+                Id = messageId
+            };
+
+            byte[] rawBody = SerializeBody(errMessage, Encoding.UTF8);
+            Message msg = CreateMessage(messageVersion, "", rawBody, Encoding.UTF8);
+
+            var property = (HttpResponseMessageProperty)msg.Properties[HttpResponseMessageProperty.Name];
+            if (property == null) {
+                property = new HttpResponseMessageProperty();
+                msg.Properties.Add(HttpResponseMessageProperty.Name, property);
+            }
+
+            SetStatusCode(errorCode, property);
+
+            return msg;
+        }
+
+        private static void SetStatusCode(int errorCode, HttpResponseMessageProperty property)
+        {
+            switch ((JsonRpcErrorCodes)errorCode) {
+                case JsonRpcErrorCodes.ParseError:
+                case JsonRpcErrorCodes.InvalidRequest:
+                case JsonRpcErrorCodes.InvalidParams:
+                    property.StatusCode = HttpStatusCode.BadRequest;
+                    property.StatusDescription = "Bad Request";
+                    break;
+                case JsonRpcErrorCodes.MethodNotFound:
+                    property.StatusCode = HttpStatusCode.NotFound;
+                    property.StatusDescription = "Method Not Found";
+                    break;
+                case JsonRpcErrorCodes.InternalError:
+                case JsonRpcErrorCodes.ServerError:
+                default:
+                    property.StatusCode = HttpStatusCode.InternalServerError;
+                    property.StatusDescription = "Internal Server Error";
+                    break;
+            }
+        }
+
         public static byte[] DeserializeBody(Message message)
         {
             using (XmlDictionaryReader bodyReader = message.GetReaderAtBodyContents()) {
