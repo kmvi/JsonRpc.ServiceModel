@@ -6,6 +6,16 @@ using System.Text;
 
 namespace JsonRpc.ServiceModel
 {
+    public enum JsonRpcErrorCodes
+    {
+        ParseError = -23700,
+        InvalidRequest = -32600,
+        MethodNotFound = -32601,
+        InvalidParams = -32602,
+        InternalError = -32603,
+        ServerError = -32000,
+    }
+
     [Serializable]
     [JsonObject(MemberSerialization.OptIn)]
     public class JsonRpcException : Exception
