@@ -40,7 +40,11 @@ namespace JsonRpc.ServiceModel.Dispatcher
                 foreach (var parameter in _requestMessage.Body.Parts) {
                     JToken value;
                     if (paramValues.TryGetValue(parameter.Name, out value)) {
-                        parameters[paramIndex] = value.ToObject(parameter.Type);
+                        try {
+                            parameters[paramIndex] = value.ToObject(parameter.Type);
+                        } catch (Exception ex) {
+                            throw new JsonRpcException((int)JsonRpcErrorCodes.InvalidParams, ex.Message, ex);
+                        }
                     }
 
                     ++paramIndex;
