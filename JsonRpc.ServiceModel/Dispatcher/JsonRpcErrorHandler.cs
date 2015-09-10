@@ -28,17 +28,23 @@ namespace JsonRpc.ServiceModel.Dispatcher
             if (OperationContext.Current.IncomingMessageProperties.ContainsKey(DispatcherUtils.MessageIdKey))
                 msgId = OperationContext.Current.IncomingMessageProperties[DispatcherUtils.MessageIdKey];
 
-            // TODO: extract exception details from FaultException
-            object additionalData;
-            var faultException = error as FaultException;
-            if (faultException != null && faultException.GetType().IsGenericType) {
-                additionalData = faultException.GetType().GetProperty("Detail").GetValue(faultException, null);
-            } else {
-                additionalData = error;
-            }
+            var jsonRpcError = error as JsonRpcException;
+            if (jsonRpcError != null)
+                fault = DispatcherUtils.CreateErrorMessage(version, msgId, jsonRpcError);
+            else {
+                // TODO: extract exception details from FaultException
+                object additionalData;
+                var faultException = error as FaultException;
+                if (faultException != null && faultException.GetType().IsGenericType) {
+                    additionalData = faultException.GetType().GetProperty("Detail").GetValue(faultException, null);
+                } else {
+                    additionalData = error;
+                }
 
-            // TODO: check error type and set appropriate error code
-            fault = DispatcherUtils.CreateErrorMessage(version, msgId, 123, error.Message, additionalData);
+                // TODO: check error type and set appropriate error code
+                fault = DispatcherUtils.CreateErrorMessage(version, msgId,
+                    (int)JsonRpcErrorCodes.ServerError, error.Message, additionalData);
+            }
         }
 
         private bool IncludeExceptionDetails()

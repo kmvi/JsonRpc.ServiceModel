@@ -35,20 +35,25 @@ namespace JsonRpc.ServiceModel.Dispatcher
             }
 
             var paramValues = body.Params as JObject;
-            if (paramValues != null) {
-                int paramIndex = 0;
-                foreach (var parameter in _requestMessage.Body.Parts) {
-                    JToken value;
-                    if (paramValues.TryGetValue(parameter.Name, out value)) {
-                        try {
-                            parameters[paramIndex] = value.ToObject(parameter.Type);
-                        } catch (Exception ex) {
-                            throw new JsonRpcException((int)JsonRpcErrorCodes.InvalidParams, ex.Message, ex);
-                        }
-                    }
+            if ((paramValues == null && parameters.Length > 0) ||
+                (paramValues != null && paramValues.Count < parameters.Length))
+            {
+                throw new JsonRpcException((int)JsonRpcErrorCodes.InvalidRequest,
+                    "Insufficient parameters count.", null);
+            }
 
-                    ++paramIndex;
+            int paramIndex = 0;
+            foreach (var parameter in _requestMessage.Body.Parts) {
+                JToken value;
+                if (paramValues.TryGetValue(parameter.Name, out value)) {
+                    try {
+                        parameters[paramIndex] = value.ToObject(parameter.Type);
+                    } catch (Exception ex) {
+                        throw new JsonRpcException((int)JsonRpcErrorCodes.InvalidParams, ex.Message, ex);
+                    }
                 }
+
+                ++paramIndex;
             }
 
             message.Properties[DispatcherUtils.MessageIdKey] = body.Id;

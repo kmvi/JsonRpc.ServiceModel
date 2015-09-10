@@ -47,18 +47,9 @@ namespace JsonRpc.ServiceModel.Dispatcher
             return message;
         }
 
-        public static Message CreateErrorMessage(MessageVersion messageVersion, object messageId,
-            int errorCode, string errorMessage, object details)
+        public static Message CreateErrorMessage<T>(MessageVersion messageVersion, JsonRpcResponse<T> response)
         {
-            var exception = new JsonRpcException(errorCode, errorMessage, details);
-            var errMessage = new JsonRpcResponse<object>()
-            {
-                Error = exception,
-                Result = null,
-                Id = messageId
-            };
-
-            byte[] rawBody = SerializeBody(errMessage, Encoding.UTF8);
+            byte[] rawBody = SerializeBody(response, Encoding.UTF8);
             Message msg = CreateMessage(messageVersion, "", rawBody, Encoding.UTF8);
 
             var property = (HttpResponseMessageProperty)msg.Properties[HttpResponseMessageProperty.Name];
@@ -67,9 +58,35 @@ namespace JsonRpc.ServiceModel.Dispatcher
                 msg.Properties.Add(HttpResponseMessageProperty.Name, property);
             }
 
-            SetStatusCode(errorCode, property);
+            SetStatusCode(response.Error.Code, property);
 
             return msg;
+        }
+
+        public static Message CreateErrorMessage(MessageVersion messageVersion, object messageId, JsonRpcException error)
+        {
+            var response = new JsonRpcResponse<object>()
+            {
+                Error = error,
+                Result = null,
+                Id = messageId
+            };
+
+            return CreateErrorMessage(messageVersion, response);
+        }
+
+        public static Message CreateErrorMessage(MessageVersion messageVersion, object messageId,
+            int errorCode, string errorMessage, object details)
+        {
+            var exception = new JsonRpcException(errorCode, errorMessage, details);
+            var response = new JsonRpcResponse<object>()
+            {
+                Error = exception,
+                Result = null,
+                Id = messageId
+            };
+
+            return CreateErrorMessage(messageVersion, response);
         }
 
         private static void SetStatusCode(int errorCode, HttpResponseMessageProperty property)
