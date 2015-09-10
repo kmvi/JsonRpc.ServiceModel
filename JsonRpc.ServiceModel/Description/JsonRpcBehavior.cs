@@ -28,7 +28,11 @@ namespace JsonRpc.ServiceModel.Description
             endpointDispatcher.ContractFilter = new MatchAllMessageFilter();
             endpointDispatcher.DispatchRuntime.OperationSelector = new JsonRpcOperationSelector();
 
-            var errHandlers = endpointDispatcher.DispatchRuntime.ChannelDispatcher.ErrorHandlers;
+            var msgInspectors = endpointDispatcher.DispatchRuntime.MessageInspectors;
+            if (!msgInspectors.OfType<JsonRpcDispatchMessageInspector>().Any())
+                msgInspectors.Add(new JsonRpcDispatchMessageInspector());
+
+            var errHandlers = endpointDispatcher.ChannelDispatcher.ErrorHandlers;
             if (!errHandlers.OfType<JsonRpcErrorHandler>().Any())
                 errHandlers.Add(new JsonRpcErrorHandler());
             

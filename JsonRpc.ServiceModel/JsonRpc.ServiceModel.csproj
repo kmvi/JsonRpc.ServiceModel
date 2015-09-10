@@ -51,6 +51,7 @@
     <Compile Include="Dispatcher\DispatcherUtils.cs" />
     <Compile Include="Dispatcher\JsonRpcClientFormatter.cs" />
     <Compile Include="Dispatcher\JsonRpcDispatchFormatter.cs" />
+    <Compile Include="Dispatcher\JsonRpcDispatchMessageInspector.cs" />
     <Compile Include="Dispatcher\JsonRpcErrorHandler.cs" />
     <Compile Include="Dispatcher\JsonRpcFormatterBase.cs" />
     <Compile Include="JsonRpcException.cs" />
