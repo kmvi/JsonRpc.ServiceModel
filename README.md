@@ -36,7 +36,7 @@ host.Open();
 - HTTPS binding
 - Metadata
 - Set correct error codes
-- Unwrap `FaultException<T>`
+- ~~Unwrap `FaultException<T>`~~
 - Tests
 - Batches (???)
 - Configuration elements
